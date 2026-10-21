@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-
+ 
   <script type="importmap">
   {
     "imports": {
@@ -21,12 +21,12 @@
     }
   }
   </script>
-
+ 
   <script type="module">
     import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/loaders/GLTFLoader.js';
     window.ThreeGLTFLoader = GLTFLoader;
   </script>
-
+ 
   <style>
     :root {
       --ar-bg: #0c0a09;
@@ -35,9 +35,9 @@
       --ar-orange: #f08a1c;
       --ar-orange-light: #ffb454;
     }
-
+ 
     * { box-sizing: border-box; }
-
+ 
     html, body {
       width: 100%;
       min-width: 0;
@@ -48,7 +48,7 @@
       overflow: hidden;
       background: var(--ar-bg);
     }
-
+ 
     body {
       position: fixed;
       inset: 0;
@@ -56,7 +56,7 @@
       -webkit-text-size-adjust: 100%;
       overscroll-behavior: none;
     }
-
+ 
     /* La escena AR ocupa exactamente el viewport, sin márgenes laterales. */
     #ar-container {
       position: fixed;
@@ -70,7 +70,7 @@
       background: #000;
       isolation: isolate;
     }
-
+ 
     #ar-container video,
     #ar-container canvas {
       position: absolute !important;
@@ -83,7 +83,7 @@
       padding: 0 !important;
       object-fit: cover;
     }
-
+ 
     /* Pantalla inicial: contenido centrado de verdad en móvil y escritorio. */
     #overlay {
       position: fixed;
@@ -113,12 +113,12 @@
       font-family: 'DM Sans', system-ui, sans-serif;
       transition: opacity .4s ease;
     }
-
+ 
     #overlay.hidden {
       opacity: 0;
       pointer-events: none;
     }
-
+ 
     #overlay .brand {
       display: flex;
       align-items: center;
@@ -129,7 +129,7 @@
       min-height: 0;
       margin-inline: auto;
     }
-
+ 
     #overlay .brand img {
       display: block;
       width: 100%;
@@ -140,14 +140,14 @@
       object-fit: contain;
       object-position: center;
     }
-
+ 
     #overlay .brand-slot {
       font-family: 'Playfair Display', Georgia, serif;
       font-weight: 800;
       font-size: 3rem;
       letter-spacing: .06em;
     }
-
+ 
     #overlay h1 {
       width: 100%;
       max-width: 16ch;
@@ -158,7 +158,7 @@
       text-align: center;
       overflow-wrap: break-word;
     }
-
+ 
     #overlay p.sub {
       width: 100%;
       max-width: 30ch;
@@ -168,7 +168,7 @@
       line-height: 1.5;
       text-align: center;
     }
-
+ 
     #start-button {
       display: inline-flex;
       align-items: center;
@@ -188,9 +188,9 @@
       box-shadow: 0 10px 40px rgba(240,138,28,.28);
       -webkit-tap-highlight-color: transparent;
     }
-
+ 
     #start-button:active { transform: scale(.97); }
-
+ 
     #progress-container {
       display: none;
       flex-direction: column;
@@ -199,7 +199,7 @@
       width: min(280px, 80vw);
       margin-inline: auto;
     }
-
+ 
     #progress-bar-track {
       width: 100%;
       height: 8px;
@@ -207,7 +207,7 @@
       background: #2a211a;
       overflow: hidden;
     }
-
+ 
     #progress-bar-fill {
       width: 0;
       height: 100%;
@@ -215,11 +215,11 @@
       background: linear-gradient(90deg, var(--ar-orange), var(--ar-orange-light));
       transition: width .3s ease;
     }
-
+ 
     #progress-label { color: var(--ar-muted); font-size: .9rem; }
     .back { color: var(--ar-muted); font-size: .9rem; text-decoration: underline; text-underline-offset: 3px; }
     .log { display: none; }
-
+ 
     @media (max-width: 480px) {
       #overlay {
         gap: 1.1rem;
@@ -229,17 +229,17 @@
           max(1rem, env(safe-area-inset-bottom))
           max(1.1rem, env(safe-area-inset-left));
       }
-
+ 
       #overlay .brand {
         width: min(210px, 64vw);
         height: 78px;
       }
-
+ 
       #overlay h1 { font-size: clamp(1.65rem, 7vw, 2.1rem); }
       #overlay p.sub { max-width: 29ch; font-size: .96rem; }
       #start-button { width: min(100%, 290px); padding-inline: 1.5rem; }
     }
-
+ 
     @media (max-height: 620px) {
       #overlay { justify-content: flex-start; gap: .8rem; }
       #overlay .brand { height: 58px; }
@@ -247,48 +247,57 @@
       #overlay p.sub { font-size: .9rem; }
       #start-button { min-height: 46px; padding-block: .7rem; }
     }
-
+ 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { transition-duration: .01ms !important; }
     }
-    /* ===== HUD de productos ===== */
+    /* ===== HUD de productos (centro libre para el AR) ===== */
+    [hidden]{display:none!important}
     #hud{position:fixed;inset:0;z-index:50;pointer-events:none;display:none;font-family:'DM Sans',system-ui,sans-serif;color:#f6efe6}
     body.ar-on #hud{display:block}
-    #hud button{font:inherit;color:inherit;cursor:pointer}
-    #hint{position:absolute;top:max(1rem,env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:.5rem 1rem;border-radius:999px;background:rgba(12,10,9,.7);backdrop-filter:blur(10px);border:1px solid #3a2d22;font-size:.9rem;white-space:nowrap;transition:opacity .4s}
-    #hint.gone{opacity:0}
-    #deck{position:absolute;left:0;right:0;bottom:0;display:flex;gap:.7rem;overflow-x:auto;scroll-snap-type:x mandatory;padding:.8rem 1rem calc(.9rem + env(safe-area-inset-bottom));pointer-events:auto;scrollbar-width:none}
-    #deck::-webkit-scrollbar{display:none}
-    .pcard{flex:0 0 min(46vw,170px);scroll-snap-align:center;display:grid;gap:.1rem;justify-items:center;padding:.8rem .6rem;border-radius:20px;border:1px solid #3a2d22;background:rgba(26,22,19,.82);backdrop-filter:blur(12px);transition:transform .25s,border-color .25s,background .25s}
-    .pcard .ico{font-size:2rem}
-    .pcard b{font-family:'Playfair Display',serif}
-    .pcard small{color:#b3a597;font-size:.72rem;line-height:1.25;text-align:center}
-    .pcard.on{border-color:#f08a1c;background:rgba(240,138,28,.2);transform:translateY(-6px)}
-    @media(min-width:900px){#deck{justify-content:center}}
-    #sheet{position:absolute;left:50%;bottom:calc(112px + env(safe-area-inset-bottom));width:min(560px,100% - 1.5rem);max-height:44vh;overflow:auto;transform:translate(-50%,130%);opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.2,.9,.2,1),opacity .3s;
-    	padding:.4rem 1.2rem 1.2rem;border-radius:26px;border:1px solid #f08a1c;background:rgba(18,15,13,.9);backdrop-filter:blur(16px)}
-    #sheet.open{transform:translate(-50%,0);opacity:1;pointer-events:auto}
-    #sh-handle{display:block;margin:.3rem auto .6rem;width:48px;height:5px;border-radius:9px;border:0;background:#4a3a2b}
-    #sheet h2{font-family:'Playfair Display',serif;font-size:1.6rem;line-height:1.1}
-    #sh-tag{color:#b3a597;font-size:.9rem;margin-bottom:.8rem}
-    .chips,.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
-    .chips button,.tabs button,#explode{padding:.45rem .95rem;border-radius:999px;border:1px solid #3a2d22;background:transparent;font-size:.88rem}
-    .chips button.on,.tabs button.on,#explode.on{background:linear-gradient(180deg,#ffb454,#f08a1c);color:#1b0f02;border-color:transparent;font-weight:700}
-    #tab-ing{display:grid;gap:.5rem}
-    .ing{display:grid;gap:.1rem;text-align:left;padding:.7rem .9rem;border-radius:14px;border:1px solid #3a2d22;background:rgba(255,255,255,.04)}
+    #hud button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    #top{position:absolute;top:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;padding:max(.5rem,env(safe-area-inset-top)) .6rem 0}
+    #sheet{width:min(520px,100%);max-height:min(34dvh,300px);display:flex;flex-direction:column;gap:.45rem;padding:.7rem .8rem .6rem;border-radius:20px;border:1px solid rgba(240,138,28,.8);
+      background:rgba(18,15,13,.86);backdrop-filter:blur(14px);transform:translateY(-140%);opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.2,.9,.2,1),opacity .3s}
+    #sheet.open{transform:none;opacity:1;pointer-events:auto}
+    .sh-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+    #sh-name{font-family:'Playfair Display',serif;font-size:1.2rem;line-height:1.1;margin:0}
+    #sh-tag{color:#b3a597;font-size:.76rem;margin:.1rem 0 0}
+    #sh-close{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid #3a2d22;background:rgba(255,255,255,.05);font-size:1rem;line-height:1}
+    .chips{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none}
+    .chips::-webkit-scrollbar{display:none}
+    .chips button{flex:0 0 auto;padding:.3rem .8rem;border-radius:999px;border:1px solid #3a2d22;background:transparent;font-size:.8rem}
+    .chips button.on{background:linear-gradient(180deg,#ffb454,#f08a1c);color:#1b0f02;border-color:transparent;font-weight:700}
+    #variants:empty{display:none}
+    #tabs button{background:rgba(255,255,255,.04)}
+    #sh-body{overflow-y:auto;min-height:0;display:grid;gap:.4rem;align-content:start;overscroll-behavior:contain}
+    .ing{display:grid;gap:.05rem;text-align:left;padding:.5rem .7rem;border-radius:12px;border:1px solid #3a2d22;background:rgba(255,255,255,.04)}
     .ing:active{border-color:#f08a1c}
-    .ing b{color:#ffb454}.ing span{color:#b3a597;font-size:.88rem}
-    #tab-spec{display:grid;gap:.4rem;margin:0}
-    #tab-spec div{display:flex;justify-content:space-between;gap:1rem;padding:.6rem .2rem;border-bottom:1px solid #2a211a}
-    #tab-spec dt{color:#ffb454}#tab-spec dd{margin:0;color:#d8cdc0;text-align:right}
-    #explode{margin-top:.9rem;width:100%}
+    .ing b{color:#ffb454;font-size:.88rem}.ing span{color:#b3a597;font-size:.78rem;line-height:1.3}
+    #sh-body dl{margin:0;display:grid}
+    #sh-body dl div{display:flex;justify-content:space-between;gap:1rem;padding:.45rem .1rem;border-bottom:1px solid #2a211a;font-size:.84rem}
+    #sh-body dt{color:#ffb454}#sh-body dd{margin:0;color:#d8cdc0;text-align:right}
+    .al{margin:0;font-size:.88rem;color:#e6dccf}.note{margin:0;font-size:.74rem;color:#b3a597}
+    #peek{margin-top:.2rem;padding:.4rem .9rem;border-radius:999px;border:1px solid rgba(240,138,28,.8);background:rgba(18,15,13,.8);backdrop-filter:blur(10px);font-size:.82rem;pointer-events:auto}
+    #bottom{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:0 .6rem max(.6rem,env(safe-area-inset-bottom))}
+    #hint{padding:.35rem .9rem;border-radius:999px;background:rgba(12,10,9,.7);backdrop-filter:blur(10px);border:1px solid #3a2d22;font-size:.82rem;transition:opacity .4s}
+    #hint.gone{display:none}
+    #actions{display:flex;gap:.5rem;pointer-events:auto}
+    #actions a,#actions button{padding:.5rem 1rem;border-radius:999px;border:1px solid rgba(240,138,28,.8);background:rgba(18,15,13,.8);backdrop-filter:blur(10px);font-size:.84rem;font-weight:700;text-decoration:none;color:#f6efe6}
+    #actions .go{background:linear-gradient(180deg,#ffb454,#f08a1c);color:#1b0f02;border-color:transparent}
+    #actions .on{background:rgba(240,138,28,.3)}
+    #deck{width:min(520px,100%);display:flex;gap:.5rem;pointer-events:auto}
+    .pcard{flex:1 1 0;min-width:0;display:grid;justify-items:center;gap:0;padding:.45rem .3rem;border-radius:16px;border:1px solid #3a2d22;background:rgba(18,15,13,.8);backdrop-filter:blur(12px);transition:transform .25s,border-color .25s,background .25s}
+    .pcard .ico{font-size:1.4rem;line-height:1.2}
+    .pcard b{font-family:'Playfair Display',serif;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    .pcard.on{border-color:#f08a1c;background:rgba(240,138,28,.22);transform:translateY(-3px)}
   </style>
 </head>
-
+ 
 <body>
   <div id="ar-container" aria-label="Vista de realidad aumentada"></div>
   <div class="log" id="log"></div>
-
+ 
   <div id="overlay">
     <div class="brand">
       <img src="assets/Logo.png" alt="GÖZ Parrilla">
@@ -304,30 +313,38 @@
     </div>
     <a class="back" href="https://TU-WEB-GOZ.com">Volver al menú</a>
   </div>
-
+ 
   <div id="hud">
-    <div id="hint">Toca una tarjeta para ver el producto</div>
-    <section id="sheet" aria-live="polite">
-      <button id="sh-handle" aria-label="Cerrar ficha"></button>
-      <h2 id="sh-name"></h2>
-      <p id="sh-tag"></p>
-      <div class="chips" id="variants"></div>
-      <div class="tabs"><button data-tab="ing" class="on">Ingredientes</button><button data-tab="spec">Ficha técnica</button></div>
-      <div id="tab-ing"></div>
-      <dl id="tab-spec" hidden></dl>
-      <button id="explode">Separar ingredientes</button>
-    </section>
-    <nav id="deck" aria-label="Productos"></nav>
+    <div id="top">
+      <section id="sheet" aria-live="polite">
+        <div class="sh-head">
+          <div><h2 id="sh-name"></h2><p id="sh-tag"></p></div>
+          <button id="sh-close" aria-label="Cerrar ficha">✕</button>
+        </div>
+        <div class="chips" id="variants"></div>
+        <div class="chips" id="tabs"></div>
+        <div id="sh-body"></div>
+      </section>
+      <button id="peek" hidden>Ver ficha ▾</button>
+    </div>
+    <div id="bottom">
+      <div id="hint">Elige un producto para verlo en AR</div>
+      <div id="actions" hidden>
+        <button id="explode">Separar ingredientes</button>
+        <a id="order" class="go" href="#" target="_blank" rel="noopener">Pedir</a>
+      </div>
+      <nav id="deck" aria-label="Productos"></nav>
+    </div>
   </div>
-
+ 
   <script type="module">
     import * as THREE from './js/three.module.js';
     import { APP } from './js/app.js';
     import { MindARController } from './js/mindar/mindar_controller.js';
     import { PRODUCTS, createGoz } from './js/goz-products.js';
-
+ 
     window.THREE = THREE;
-
+ 
     const log = document.getElementById('log');
     const overlay = document.getElementById('overlay');
     const startButton = document.getElementById('start-button');
@@ -335,26 +352,26 @@
     const progressContainer = document.getElementById('progress-container');
     const progressFill = document.getElementById('progress-bar-fill');
     const progressLabel = document.getElementById('progress-label');
-
+ 
     const debugMode = new URLSearchParams(location.search).get('debug') === '1';
-
+ 
     let player = null;
     let mindarController = null;
     let loaded = false;
     let loadPromise = null;
-
+ 
     function setProgress(percent, message) {
       const value = Math.max(0, Math.min(100, percent));
       progressFill.style.width = `${value}%`;
       progressLabel.textContent = `${message} ${value}%`;
     }
-
+ 
     async function loadEverything() {
       if (loadPromise) return loadPromise;
-
+ 
       loadPromise = (async () => {
         setProgress(0, 'Cargando escena...');
-
+ 
         const jsonText = await new Promise((resolve, reject) => {
           const loader = new THREE.FileLoader();
           loader.load(
@@ -368,14 +385,14 @@
             error => reject(new Error(error?.statusText || 'No se pudo descargar app.json'))
           );
         });
-
+ 
         player = new APP.Player({ alpha: true });
         await player.load(JSON.parse(jsonText));
         player.setSize(window.innerWidth, window.innerHeight);
         player.play();
-
+ 
         document.body.appendChild(player.dom);
-
+ 
         // El canvas auxiliar de Three.js no debe interferir con la vista AR.
         if (player.dom) {
           player.dom.style.position = 'fixed';
@@ -383,16 +400,16 @@
           player.dom.style.top = '0';
           player.dom.style.maxWidth = '100%';
         }
-
+ 
         window.addEventListener('resize', () => {
           if (player) player.setSize(window.innerWidth, window.innerHeight);
         }, { passive: true });
-
+ 
         window.player = player;
         setProgress(85, 'Preparando AR...');
         log.textContent = 'initializing...';
         await new Promise(resolve => setTimeout(resolve, 10));
-
+ 
         setProgress(100, 'Listo');
         loaded = true;
         console.log(window.player);
@@ -401,10 +418,10 @@
         loadPromise = null;
         throw error;
       });
-
+ 
       return loadPromise;
     }
-
+ 
     // ===== HUD de productos: carrusel + ficha =====
     function initGoz() {
       const mount = mindarController.anchors?.[0]?.group, cam = mindarController.mindar?.camera;
@@ -416,59 +433,79 @@
         old.onClick = null;
         old.traverse((o) => { if (o.isMesh) o.visible = false; });
       });
+ 
       const $ = (id) => document.getElementById(id);
-      const sheet = $('sheet'), deck = $('deck');
-      let pi = -1, vi = 0, exploded = false;
-      const goz = createGoz({ mount, camera: cam, dom: arContainer, onTap: () => sheet.classList.add('open') });
-
-      deck.innerHTML = PRODUCTS.map((p, i) => `<button class="pcard" data-i="${i}"><span class="ico">${p.icon}</span><b>${p.name}</b><small>${p.tag}</small></button>`).join('');
-
-      function fill() {
+      const sheet = $('sheet'), deck = $('deck'), body = $('sh-body');
+      const WHATSAPP = '573000000000'; // ← cambia por el número real (con indicativo, sin +)
+      let pi = -1, vi = 0, tab = 'ing', exploded = false;
+      const goz = createGoz({ mount, camera: cam, dom: arContainer, onTap: () => setOpen(true) });
+ 
+      deck.innerHTML = PRODUCTS.map((p, i) => `<button class="pcard" data-i="${i}"><span class="ico">${p.icon}</span><b>${p.name}</b></button>`).join('');
+ 
+      function setOpen(o) { sheet.classList.toggle('open', o); $('peek').hidden = o || pi < 0; }
+ 
+      function render() {
         const p = PRODUCTS[pi], v = p.variants[vi];
-        $('sh-name').textContent = p.name;
+        const al = v.specs.find((x) => x[0].startsWith('Contiene'));
+        const specs = v.specs.filter((x) => x !== al);
+        const tabs = [['ing', 'Ingredientes'], ['spec', 'Ficha técnica']];
+        if (al) tabs.push(['al', 'Alérgenos']);
+        if (!tabs.some((t) => t[0] === tab)) tab = 'ing';
+ 
+        $('sh-name').textContent = `${p.icon} ${p.name}`;
         $('sh-tag').textContent = p.tag;
         $('variants').innerHTML = p.variants.length > 1 ? p.variants.map((x, j) => `<button data-v="${j}" class="${j === vi ? 'on' : ''}">${x.label}</button>`).join('') : '';
-        $('tab-ing').innerHTML = v.ingredients.map((g) => `<button class="ing" data-part="${g.part}"><b>${g.name}</b><span>${g.detail || ''}</span></button>`).join('');
-        $('tab-spec').innerHTML = v.specs.map(([k, val]) => `<div><dt>${k}</dt><dd>${val}</dd></div>`).join('');
+        $('tabs').innerHTML = tabs.map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('');
+        body.innerHTML =
+          tab === 'ing' ? v.ingredients.map((g) => `<button class="ing" data-part="${g.part}"><b>${g.name}</b><span>${g.detail || ''}</span></button>`).join('') :
+          tab === 'spec' ? `<dl>${specs.map(([k, val]) => `<div><dt>${k}</dt><dd>${val}</dd></div>`).join('')}</dl>` :
+          `<p class="al">${al[1]}</p><p class="note">Información de referencia. Si tienes alguna alergia, confírmala con el local.</p>`;
+        const label = p.variants.length > 1 ? `${p.name} ${v.label}` : p.name;
+        $('order').href = `https://wa.me/${WHATSAPP}?text=` + encodeURIComponent(`Hola, quiero pedir: ${label}.`);
       }
+ 
       function select(i) {
-        if (i === pi) { sheet.classList.toggle('open'); return; }
-        pi = i; vi = 0; fill();
+        if (i === pi) { setOpen(!sheet.classList.contains('open')); return; }
+        pi = i; vi = 0; tab = 'ing'; render();
         goz.show(PRODUCTS[pi], vi); goz.setExplode(exploded);
-        sheet.classList.add('open'); $('hint').classList.add('gone');
+        setOpen(true); $('hint').classList.add('gone'); $('actions').hidden = false;
         deck.querySelectorAll('.pcard').forEach((c, j) => c.classList.toggle('on', j === i));
       }
-      deck.addEventListener('click', (e) => { const c = e.target.closest('.pcard'); if (c) select(+c.dataset.i); });
+ 
+      $('bottom').addEventListener('click', (e) => {
+        const c = e.target.closest('.pcard'); if (c) return select(+c.dataset.i);
+        if (e.target.id === 'explode') {
+          exploded = !exploded; e.target.classList.toggle('on', exploded);
+          e.target.textContent = exploded ? 'Juntar ingredientes' : 'Separar ingredientes'; goz.setExplode(exploded);
+        }
+      });
+      $('peek').addEventListener('click', () => setOpen(true));
       sheet.addEventListener('click', (e) => {
         const t = e.target.closest('button'); if (!t) return;
-        if (t.id === 'sh-handle') sheet.classList.remove('open');
-        else if (t.dataset.v) { vi = +t.dataset.v; fill(); goz.show(PRODUCTS[pi], vi); goz.setExplode(exploded); }
-        else if (t.dataset.tab) {
-          sheet.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('on', b === t));
-          $('tab-ing').hidden = t.dataset.tab !== 'ing'; $('tab-spec').hidden = t.dataset.tab !== 'spec';
-        }
+        if (t.id === 'sh-close') setOpen(false);
+        else if (t.dataset.v) { vi = +t.dataset.v; render(); goz.show(PRODUCTS[pi], vi); goz.setExplode(exploded); }
+        else if (t.dataset.tab) { tab = t.dataset.tab; render(); }
         else if (t.dataset.part) goz.highlight(t.dataset.part);
-        else if (t.id === 'explode') { exploded = !exploded; t.classList.toggle('on', exploded); t.textContent = exploded ? 'Juntar ingredientes' : 'Separar ingredientes'; goz.setExplode(exploded); }
       });
     }
-
+ 
     startButton.addEventListener('click', async () => {
       startButton.disabled = true;
       startButton.textContent = 'Iniciando...';
       progressContainer.style.display = 'flex';
-
+ 
       try {
         await loadEverything();
         if (!loaded) return;
-
+ 
         setProgress(90, 'Iniciando cámara...');
         mindarController = new MindARController(arContainer, player, debugMode);
         window.mindarController = mindarController;
-
+ 
         await mindarController.start();
-
+ 
         if (player?.dom) player.dom.style.display = 'none';
-
+ 
         overlay.classList.add('hidden');
         document.body.classList.add('ar-on');
         initGoz();
@@ -480,7 +517,7 @@
         setProgress(0, 'No se pudo iniciar');
       }
     });
-
+ 
     // Precarga de la escena; la cámara solo se solicita al tocar Iniciar.
     loadEverything().catch(error => {
       console.error('Error durante la carga automática:', error);
