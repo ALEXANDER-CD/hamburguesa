@@ -1,193 +1,398 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-	<title>Goz Parrilla | Realidad aumentada</title>
-	<meta charset="utf-8">
-	<meta name="generator" content="Three.js Editor">
-	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<link rel="stylesheet" href="css/app.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0a09">
+  <title>GÖZ Parrilla | Realidad aumentada</title>
+  <meta name="description" content="Disfruta la experiencia de realidad aumentada de GÖZ Parrilla.">
+  <meta name="generator" content="Three.js Editor">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
-	<script type="importmap">
-	{
-		"imports": {
-			"three": "./js/three.compat.js",
-			"three/addons/": "./js/addons/",
-			"mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
-		}
-	}
-	</script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./js/three.compat.js",
+      "three/addons/": "./js/addons/",
+      "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+    }
+  }
+  </script>
 
-	<script type="module">
-		import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/loaders/GLTFLoader.js';
-		window.ThreeGLTFLoader = GLTFLoader;
-	</script>
-	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-	<style>
-		#overlay{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;padding:2rem;text-align:center;
-			background:radial-gradient(40rem 24rem at 50% 0,rgba(240,138,28,.28),transparent 70%),#0c0a09;color:#f6efe6;font-family:'DM Sans',system-ui,sans-serif;transition:opacity .4s}
-		#overlay.hidden{opacity:0;pointer-events:none}
-		#overlay .brand{width:min(220px,60vw);min-height:80px;display:grid;place-items:center}
-		#overlay .brand img{max-width:100%}
-		#overlay .brand-slot{font-family:'Playfair Display',Georgia,serif;font-weight:800;font-size:3rem;letter-spacing:.06em}
-		#overlay h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.6rem,6vw,2.4rem);line-height:1.15;max-width:16ch}
-		#overlay p.sub{color:#b3a597;max-width:30ch;font-size:1rem;line-height:1.5}
-		#start-button{background:linear-gradient(180deg,#ffb454,#f08a1c);color:#1b0f02;border:0;border-radius:999px;padding:1rem 2.4rem;font:700 1.1rem 'DM Sans',sans-serif;cursor:pointer;box-shadow:0 10px 40px rgba(240,138,28,.35)}
-		#start-button:active{transform:scale(.97)}
-		#progress-container{display:none;flex-direction:column;align-items:center;gap:.6rem;width:min(280px,80vw)}
-		#progress-bar-track{width:100%;height:8px;border-radius:99px;background:#2a211a;overflow:hidden}
-		#progress-bar-fill{height:100%;width:0;background:linear-gradient(90deg,#f08a1c,#ffb454);border-radius:99px;transition:width .3s}
-		#progress-label{font-size:.9rem;color:#b3a597}
-		.back{color:#b3a597;font-size:.9rem;text-decoration:underline}
-		.log{display:none}
-	</style>
+  <script type="module">
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/loaders/GLTFLoader.js';
+    window.ThreeGLTFLoader = GLTFLoader;
+  </script>
+
+  <style>
+    :root {
+      --ar-bg: #0c0a09;
+      --ar-text: #f6efe6;
+      --ar-muted: #b3a597;
+      --ar-orange: #f08a1c;
+      --ar-orange-light: #ffb454;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      min-width: 0;
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: var(--ar-bg);
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      -webkit-text-size-adjust: 100%;
+      overscroll-behavior: none;
+    }
+
+    /* La escena AR ocupa exactamente el viewport, sin márgenes laterales. */
+    #ar-container {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+      isolation: isolate;
+    }
+
+    #ar-container video,
+    #ar-container canvas {
+      position: absolute !important;
+      inset: 0 !important;
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      object-fit: cover;
+    }
+
+    /* Pantalla inicial: contenido centrado de verdad en móvil y escritorio. */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(1rem, 3vh, 1.6rem);
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      min-height: 100svh;
+      margin: 0;
+      padding:
+        max(1.25rem, env(safe-area-inset-top))
+        max(1.25rem, env(safe-area-inset-right))
+        max(1.25rem, env(safe-area-inset-bottom))
+        max(1.25rem, env(safe-area-inset-left));
+      overflow-y: auto;
+      text-align: center;
+      background:
+        radial-gradient(40rem 24rem at 50% 0, rgba(240,138,28,.28), transparent 70%),
+        var(--ar-bg);
+      color: var(--ar-text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      transition: opacity .4s ease;
+    }
+
+    #overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #overlay .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      width: min(240px, 68vw);
+      height: clamp(76px, 14vh, 110px);
+      min-height: 0;
+      margin-inline: auto;
+    }
+
+    #overlay .brand img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      margin: 0 auto;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    #overlay .brand-slot {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 800;
+      font-size: 3rem;
+      letter-spacing: .06em;
+    }
+
+    #overlay h1 {
+      width: 100%;
+      max-width: 16ch;
+      margin: 0 auto;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.65rem, 6vw, 2.4rem);
+      line-height: 1.15;
+      text-align: center;
+      overflow-wrap: break-word;
+    }
+
+    #overlay p.sub {
+      width: 100%;
+      max-width: 30ch;
+      margin: 0 auto;
+      color: var(--ar-muted);
+      font-size: 1rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    #start-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      max-width: 100%;
+      min-height: 54px;
+      margin: 0 auto;
+      padding: .95rem 2.4rem;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--ar-orange-light), var(--ar-orange));
+      color: #1b0f02;
+      font: 700 1.1rem 'DM Sans', sans-serif;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 10px 40px rgba(240,138,28,.28);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #start-button:active { transform: scale(.97); }
+
+    #progress-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: .6rem;
+      width: min(280px, 80vw);
+      margin-inline: auto;
+    }
+
+    #progress-bar-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 99px;
+      background: #2a211a;
+      overflow: hidden;
+    }
+
+    #progress-bar-fill {
+      width: 0;
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--ar-orange), var(--ar-orange-light));
+      transition: width .3s ease;
+    }
+
+    #progress-label { color: var(--ar-muted); font-size: .9rem; }
+    .back { color: var(--ar-muted); font-size: .9rem; text-decoration: underline; text-underline-offset: 3px; }
+    .log { display: none; }
+
+    @media (max-width: 480px) {
+      #overlay {
+        gap: 1.1rem;
+        padding:
+          max(1rem, env(safe-area-inset-top))
+          max(1.1rem, env(safe-area-inset-right))
+          max(1rem, env(safe-area-inset-bottom))
+          max(1.1rem, env(safe-area-inset-left));
+      }
+
+      #overlay .brand {
+        width: min(210px, 64vw);
+        height: 78px;
+      }
+
+      #overlay h1 { font-size: clamp(1.65rem, 7vw, 2.1rem); }
+      #overlay p.sub { max-width: 29ch; font-size: .96rem; }
+      #start-button { width: min(100%, 290px); padding-inline: 1.5rem; }
+    }
+
+    @media (max-height: 620px) {
+      #overlay { justify-content: flex-start; gap: .8rem; }
+      #overlay .brand { height: 58px; }
+      #overlay h1 { font-size: clamp(1.4rem, 5vh, 1.8rem); }
+      #overlay p.sub { font-size: .9rem; }
+      #start-button { min-height: 46px; padding-block: .7rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
 
-<body ontouchstart="">
+<body>
+  <div id="ar-container" aria-label="Vista de realidad aumentada"></div>
+  <div class="log" id="log"></div>
 
-	<div id="ar-container"></div>
+  <div id="overlay">
+    <div class="brand">
+      <img src="assets/Logo.png" alt="GÖZ Parrilla">
+    </div>
+    <h1>Disfruta de nuestra experiencia AR</h1>
+    <p class="sub">Permite el acceso a la cámara y apunta al código para ver el producto sobre tu mesa.</p>
+    <button id="start-button" type="button">Iniciar</button>
+    <div id="progress-container" aria-live="polite">
+      <div id="progress-bar-track">
+        <div id="progress-bar-fill"></div>
+      </div>
+      <div id="progress-label">Cargando... 0%</div>
+    </div>
+    <a class="back" href="https://TU-WEB-GOZ.com">Volver al menú</a>
+  </div>
 
-	<div class="log" id="log"></div>
+  <script type="module">
+    import * as THREE from './js/three.module.js';
+    import { APP } from './js/app.js';
+    import { MindARController } from './js/mindar/mindar_controller.js';
 
-	<div id="overlay">
-		<!-- LOGO: reemplaza el span por <img src="logo.png" alt="Goz Parrilla"> -->
-		<div class="brand"><img src="assets/Logo.png" alt="Goz Parrilla"></div>
-		<h1>Disfruta de nuestra experiencia AR</h1>
-		<p class="sub">Permite el acceso a la cámara y apunta al código para ver el producto sobre tu mesa.</p>
-		<button id="start-button">Iniciar</button>
-		<div id="progress-container">
-			<div id="progress-bar-track">
-				<div id="progress-bar-fill"></div>
-			</div>
-			<div id="progress-label">Cargando... 0%</div>
-		</div>
-		<a class="back" href="https://TU-WEB-GOZ.com">Volver al menú</a>
-	</div>
+    window.THREE = THREE;
 
-	<script type="module">
+    const log = document.getElementById('log');
+    const overlay = document.getElementById('overlay');
+    const startButton = document.getElementById('start-button');
+    const arContainer = document.getElementById('ar-container');
+    const progressContainer = document.getElementById('progress-container');
+    const progressFill = document.getElementById('progress-bar-fill');
+    const progressLabel = document.getElementById('progress-label');
 
-		import * as THREE from './js/three.module.js';
-		import { APP } from './js/app.js';
-		import { MindARController } from './js/mindar/mindar_controller.js';
+    const debugMode = new URLSearchParams(location.search).get('debug') === '1';
 
-		window.THREE = THREE; // Used by APP Scripts.
+    let player = null;
+    let mindarController = null;
+    let loaded = false;
+    let loadPromise = null;
 
-		const log = document.getElementById('log');
-		const overlay = document.getElementById('overlay');
-		const startButton = document.getElementById('start-button');
-		const arContainer = document.getElementById('ar-container');
-		const progressContainer = document.getElementById('progress-container');
-		const progressFill = document.getElementById('progress-bar-fill');
-		const progressLabel = document.getElementById('progress-label');
+    function setProgress(percent, message) {
+      const value = Math.max(0, Math.min(100, percent));
+      progressFill.style.width = `${value}%`;
+      progressLabel.textContent = `${message} ${value}%`;
+    }
 
-		const debugMode = new URLSearchParams(location.search).get('debug') === '1';
+    async function loadEverything() {
+      if (loadPromise) return loadPromise;
 
-		let player = null;
-		let mindarController = null;
-		let loaded = false;
-		let loadPromise = null;
+      loadPromise = (async () => {
+        setProgress(0, 'Cargando escena...');
 
-		function setProgress(percent, text) {
-			progressFill.style.width = `${percent}%`;
-			progressLabel.textContent = `${text} ${percent}%`;
-		}
+        const jsonText = await new Promise((resolve, reject) => {
+          const loader = new THREE.FileLoader();
+          loader.load(
+            'app.json',
+            resolve,
+            event => {
+              if (event.lengthComputable) {
+                setProgress(Math.round((event.loaded / event.total) * 25), 'Cargando escena...');
+              }
+            },
+            error => reject(new Error(error?.statusText || 'No se pudo descargar app.json'))
+          );
+        });
 
-		async function loadEverything() {
+        player = new APP.Player({ alpha: true });
+        await player.load(JSON.parse(jsonText));
+        player.setSize(window.innerWidth, window.innerHeight);
+        player.play();
 
-			if (loadPromise) return loadPromise;
+        document.body.appendChild(player.dom);
 
-			loadPromise = (async () => {
+        // El canvas auxiliar de Three.js no debe interferir con la vista AR.
+        if (player.dom) {
+          player.dom.style.position = 'fixed';
+          player.dom.style.left = '0';
+          player.dom.style.top = '0';
+          player.dom.style.maxWidth = '100%';
+        }
 
-				setProgress(0, 'Cargando escena...');
+        window.addEventListener('resize', () => {
+          if (player) player.setSize(window.innerWidth, window.innerHeight);
+        }, { passive: true });
 
-				// Descarga app.json con progreso real (0% - 25%)
-				const text = await new Promise((resolve, reject) => {
-					const loader = new THREE.FileLoader();
-					loader.load(
-						'app.json',
-						(t) => resolve(t),
-						(e) => {
-							if (e.lengthComputable) {
-								const p = Math.round((e.loaded / e.total) * 25);
-								setProgress(p, 'Cargando escena...');
-							}
-						},
-						(err) => reject(new Error(err.statusText || 'No se pudo descargar el json'))
-					);
-				});
+        window.player = player;
+        setProgress(85, 'Preparando AR...');
+        log.textContent = 'initializing...';
+        await new Promise(resolve => setTimeout(resolve, 10));
 
-				player = new APP.Player({ alpha: true });
-				await player.load(JSON.parse(text));
-				player.setSize(window.innerWidth, window.innerHeight);
-				player.play();
-				setProgress(55, 'Escena lista...');
+        setProgress(100, 'Listo');
+        loaded = true;
+        console.log(window.player);
+      })().catch(error => {
+        loaded = false;
+        loadPromise = null;
+        throw error;
+      });
 
-				document.body.appendChild(player.dom);
+      return loadPromise;
+    }
 
-				window.addEventListener('resize', function () {
-					player.setSize(window.innerWidth, window.innerHeight);
-				});
+    startButton.addEventListener('click', async () => {
+      startButton.disabled = true;
+      startButton.textContent = 'Iniciando...';
+      progressContainer.style.display = 'flex';
 
-				window.player = player;
+      try {
+        await loadEverything();
+        if (!loaded) return;
 
-				setProgress(85, 'Preparando AR...');
-				log.textContent = 'initializing...';
+        setProgress(90, 'Iniciando cámara...');
+        mindarController = new MindARController(arContainer, player, debugMode);
+        window.mindarController = mindarController;
 
-				await new Promise((resolve) => setTimeout(resolve, 10));
+        await mindarController.start();
 
-				setProgress(100, 'Listo');
-				loaded = true;
+        if (player?.dom) player.dom.style.display = 'none';
 
-				console.log(window.player);
+        overlay.classList.add('hidden');
+        window.setTimeout(() => overlay.remove(), 400);
+      } catch (error) {
+        console.error('Error durante la carga o el inicio de AR:', error);
+        startButton.disabled = false;
+        startButton.textContent = 'Reintentar';
+        setProgress(0, 'No se pudo iniciar');
+      }
+    });
 
-			})().catch((e) => {
-				loaded = false;
-				loadPromise = null; // permite reintentar al pulsar el botón
-				throw e;
-			});
-
-			return loadPromise;
-		}
-
-		// Al darle al botón start se inicia la cámara (requiere gesto del usuario).
-		startButton.addEventListener('click', async () => {
-
-			progressContainer.style.display = 'flex';
-
-			try {
-				await loadEverything();
-				if (!loaded) return;
-
-				setProgress(90, 'Iniciando cámara...');
-
-				// La cámara se inicia aquí, dentro del gesto del usuario.
-				mindarController = new MindARController(arContainer, player, debugMode);
-				window.mindarController = mindarController;
-
-				await mindarController.start();
-
-				// El player sigue funcionando (scripts/audio) pero su canvas ya no se usa.
-				if (player?.dom) player.dom.style.display = 'none';
-
-				overlay.classList.add('hidden');
-				setTimeout(() => overlay.remove(), 400);
-			} catch (e) {
-				console.error('Error durante la carga:', e);
-				startButton.textContent = 'Reintentar';
-				setProgress(0, 'Error al iniciar');
-			}
-
-		});
-
-		// Todo se carga automáticamente al abrir la página.
-		loadEverything().catch((e) => {
-			console.error('Error durante la carga automática:', e.message);
-			progressContainer.style.display = 'flex';
-			setProgress(0, 'Error al cargar');
-			startButton.textContent = 'Reintentar';
-		});
-
-	</script>
+    // Precarga de la escena; la cámara solo se solicita al tocar Iniciar.
+    loadEverything().catch(error => {
+      console.error('Error durante la carga automática:', error);
+      progressContainer.style.display = 'flex';
+      setProgress(0, 'Error al cargar');
+      startButton.disabled = false;
+      startButton.textContent = 'Reintentar';
+    });
+  </script>
 </body>
-
 </html>
