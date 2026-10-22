@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
- 
+
   <script type="importmap">
   {
     "imports": {
@@ -21,12 +21,12 @@
     }
   }
   </script>
- 
+
   <script type="module">
     import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/loaders/GLTFLoader.js';
     window.ThreeGLTFLoader = GLTFLoader;
   </script>
- 
+
   <style>
     :root {
       --ar-bg: #0c0a09;
@@ -35,9 +35,9 @@
       --ar-orange: #f08a1c;
       --ar-orange-light: #ffb454;
     }
- 
+
     * { box-sizing: border-box; }
- 
+
     html, body {
       width: 100%;
       min-width: 0;
@@ -48,7 +48,7 @@
       overflow: hidden;
       background: var(--ar-bg);
     }
- 
+
     body {
       position: fixed;
       inset: 0;
@@ -56,7 +56,7 @@
       -webkit-text-size-adjust: 100%;
       overscroll-behavior: none;
     }
- 
+
     /* La escena AR ocupa exactamente el viewport, sin márgenes laterales. */
     #ar-container {
       position: fixed;
@@ -70,7 +70,7 @@
       background: #000;
       isolation: isolate;
     }
- 
+
     #ar-container video,
     #ar-container canvas {
       position: absolute !important;
@@ -83,7 +83,7 @@
       padding: 0 !important;
       object-fit: cover;
     }
- 
+
     /* Pantalla inicial: contenido centrado de verdad en móvil y escritorio. */
     #overlay {
       position: fixed;
@@ -113,12 +113,12 @@
       font-family: 'DM Sans', system-ui, sans-serif;
       transition: opacity .4s ease;
     }
- 
+
     #overlay.hidden {
       opacity: 0;
       pointer-events: none;
     }
- 
+
     #overlay .brand {
       display: flex;
       align-items: center;
@@ -129,7 +129,7 @@
       min-height: 0;
       margin-inline: auto;
     }
- 
+
     #overlay .brand img {
       display: block;
       width: 100%;
@@ -140,14 +140,14 @@
       object-fit: contain;
       object-position: center;
     }
- 
+
     #overlay .brand-slot {
       font-family: 'Playfair Display', Georgia, serif;
       font-weight: 800;
       font-size: 3rem;
       letter-spacing: .06em;
     }
- 
+
     #overlay h1 {
       width: 100%;
       max-width: 16ch;
@@ -158,7 +158,7 @@
       text-align: center;
       overflow-wrap: break-word;
     }
- 
+
     #overlay p.sub {
       width: 100%;
       max-width: 30ch;
@@ -168,7 +168,7 @@
       line-height: 1.5;
       text-align: center;
     }
- 
+
     #start-button {
       display: inline-flex;
       align-items: center;
@@ -188,9 +188,9 @@
       box-shadow: 0 10px 40px rgba(240,138,28,.28);
       -webkit-tap-highlight-color: transparent;
     }
- 
+
     #start-button:active { transform: scale(.97); }
- 
+
     #progress-container {
       display: none;
       flex-direction: column;
@@ -199,7 +199,7 @@
       width: min(280px, 80vw);
       margin-inline: auto;
     }
- 
+
     #progress-bar-track {
       width: 100%;
       height: 8px;
@@ -207,7 +207,7 @@
       background: #2a211a;
       overflow: hidden;
     }
- 
+
     #progress-bar-fill {
       width: 0;
       height: 100%;
@@ -215,11 +215,11 @@
       background: linear-gradient(90deg, var(--ar-orange), var(--ar-orange-light));
       transition: width .3s ease;
     }
- 
+
     #progress-label { color: var(--ar-muted); font-size: .9rem; }
     .back { color: var(--ar-muted); font-size: .9rem; text-decoration: underline; text-underline-offset: 3px; }
     .log { display: none; }
- 
+
     @media (max-width: 480px) {
       #overlay {
         gap: 1.1rem;
@@ -229,17 +229,17 @@
           max(1rem, env(safe-area-inset-bottom))
           max(1.1rem, env(safe-area-inset-left));
       }
- 
+
       #overlay .brand {
         width: min(210px, 64vw);
         height: 78px;
       }
- 
+
       #overlay h1 { font-size: clamp(1.65rem, 7vw, 2.1rem); }
       #overlay p.sub { max-width: 29ch; font-size: .96rem; }
       #start-button { width: min(100%, 290px); padding-inline: 1.5rem; }
     }
- 
+
     @media (max-height: 620px) {
       #overlay { justify-content: flex-start; gap: .8rem; }
       #overlay .brand { height: 58px; }
@@ -247,7 +247,7 @@
       #overlay p.sub { font-size: .9rem; }
       #start-button { min-height: 46px; padding-block: .7rem; }
     }
- 
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { transition-duration: .01ms !important; }
     }
@@ -297,11 +297,11 @@
     .pcard.on{border-color:#f08a1c;background:rgba(240,138,28,.22);transform:translateY(-3px)}
   </style>
 </head>
- 
+
 <body>
   <div id="ar-container" aria-label="Vista de realidad aumentada"></div>
   <div class="log" id="log"></div>
- 
+
   <div id="overlay">
     <div class="brand">
       <img src="assets/Logo.png" alt="GÖZ Parrilla">
@@ -317,7 +317,7 @@
     </div>
     <a class="back" href="https://TU-WEB-GOZ.com">Volver al menú</a>
   </div>
- 
+
   <div id="hud">
     <div id="top">
       <section id="sheet" aria-live="polite">
@@ -343,15 +343,15 @@
       <nav id="deck" aria-label="Productos"></nav>
     </div>
   </div>
- 
+
   <script type="module">
     import * as THREE from './js/three.module.js';
     import { APP } from './js/app.js';
     import { MindARController } from './js/mindar/mindar_controller.js';
     import { PRODUCTS, createGoz } from './js/goz-products.js';
- 
+
     window.THREE = THREE;
- 
+
     const log = document.getElementById('log');
     const overlay = document.getElementById('overlay');
     const startButton = document.getElementById('start-button');
@@ -359,26 +359,26 @@
     const progressContainer = document.getElementById('progress-container');
     const progressFill = document.getElementById('progress-bar-fill');
     const progressLabel = document.getElementById('progress-label');
- 
+
     const debugMode = new URLSearchParams(location.search).get('debug') === '1';
- 
+
     let player = null;
     let mindarController = null;
     let loaded = false;
     let loadPromise = null;
- 
+
     function setProgress(percent, message) {
       const value = Math.max(0, Math.min(100, percent));
       progressFill.style.width = `${value}%`;
       progressLabel.textContent = `${message} ${value}%`;
     }
- 
+
     async function loadEverything() {
       if (loadPromise) return loadPromise;
- 
+
       loadPromise = (async () => {
         setProgress(0, 'Cargando escena...');
- 
+
         const jsonText = await new Promise((resolve, reject) => {
           const loader = new THREE.FileLoader();
           loader.load(
@@ -392,14 +392,14 @@
             error => reject(new Error(error?.statusText || 'No se pudo descargar app.json'))
           );
         });
- 
+
         player = new APP.Player({ alpha: true });
         await player.load(JSON.parse(jsonText));
         player.setSize(window.innerWidth, window.innerHeight);
         player.play();
- 
+
         document.body.appendChild(player.dom);
- 
+
         // El canvas auxiliar de Three.js no debe interferir con la vista AR.
         if (player.dom) {
           player.dom.style.position = 'fixed';
@@ -407,16 +407,16 @@
           player.dom.style.top = '0';
           player.dom.style.maxWidth = '100%';
         }
- 
+
         window.addEventListener('resize', () => {
           if (player) player.setSize(window.innerWidth, window.innerHeight);
         }, { passive: true });
- 
+
         window.player = player;
         setProgress(85, 'Preparando AR...');
         log.textContent = 'initializing...';
         await new Promise(resolve => setTimeout(resolve, 10));
- 
+
         setProgress(100, 'Listo');
         loaded = true;
         console.log(window.player);
@@ -425,10 +425,10 @@
         loadPromise = null;
         throw error;
       });
- 
+
       return loadPromise;
     }
- 
+
     // ===== HUD de productos: carrusel + ficha =====
     function initGoz() {
       const mount = mindarController.anchors?.[0]?.group, cam = mindarController.mindar?.camera;
@@ -440,17 +440,17 @@
         old.onClick = null;
         old.traverse((o) => { if (o.isMesh) o.visible = false; });
       });
- 
+
       const $ = (id) => document.getElementById(id);
       const sheet = $('sheet'), deck = $('deck'), body = $('sh-body');
       const WHATSAPP = '573000000000'; // ← cambia por el número real (con indicativo, sin +)
       let pi = -1, vi = 0, tab = null, exploded = false;
       const goz = createGoz({ mount, camera: cam, dom: arContainer, onTap: () => setOpen(true) });
- 
+
       deck.innerHTML = PRODUCTS.map((p, i) => `<button class="pcard" data-i="${i}"><span class="ico">${p.icon}</span><b>${p.name}</b></button>`).join('');
- 
+
       function setOpen(o) { sheet.classList.toggle('open', o); $('peek').hidden = o || pi < 0; $('detail').hidden = !o || !tab; }
- 
+
       function render() {
         const p = PRODUCTS[pi], v = p.variants[vi];
         const al = v.specs.find((x) => x[0].startsWith('Contiene'));
@@ -458,7 +458,7 @@
         const tabs = [['ing', '🧾 Ingredientes'], ['spec', '📋 Ficha']];
         if (al) tabs.push(['al', '⚠️ Alérgenos']);
         if (tab && !tabs.some((t) => t[0] === tab)) tab = null;
- 
+
         $('sh-name').textContent = `${p.icon} ${p.name}`;
         $('sh-tag').textContent = p.tag;
         $('variants').innerHTML = p.variants.length > 1 ? p.variants.map((x, j) => `<button data-v="${j}" class="${j === vi ? 'on' : ''}">${x.label}</button>`).join('') : '';
@@ -472,15 +472,25 @@
         const label = p.variants.length > 1 ? `${p.name} ${v.label}` : p.name;
         $('order').href = `https://wa.me/${WHATSAPP}?text=` + encodeURIComponent(`Hola, quiero pedir: ${label}.`);
       }
- 
+
+      function loadModel() {
+        const h = $('hint'); h.textContent = 'Cargando modelo…'; h.classList.remove('gone');
+        goz.show(PRODUCTS[pi], vi).then((r) => {
+          if (!r) return;
+          h.classList.add('gone');
+          $('explode').hidden = !r.explodable;
+          goz.setExplode(r.explodable && exploded);
+        });
+      }
+
       function select(i) {
         if (i === pi) { setOpen(!sheet.classList.contains('open')); return; }
         pi = i; vi = 0; tab = null; render();
-        goz.show(PRODUCTS[pi], vi); goz.setExplode(exploded);
-        setOpen(true); $('hint').classList.add('gone'); $('actions').hidden = false;
+        loadModel();
+        setOpen(true); $('actions').hidden = false;
         deck.querySelectorAll('.pcard').forEach((c, j) => c.classList.toggle('on', j === i));
       }
- 
+
       $('bottom').addEventListener('click', (e) => {
         const c = e.target.closest('.pcard'); if (c) return select(+c.dataset.i);
         if (e.target.id === 'explode') {
@@ -497,29 +507,29 @@
       sheet.addEventListener('click', (e) => {
         const t = e.target.closest('button'); if (!t) return;
         if (t.id === 'sh-close') setOpen(false);
-        else if (t.dataset.v) { vi = +t.dataset.v; render(); goz.show(PRODUCTS[pi], vi); goz.setExplode(exploded); }
+        else if (t.dataset.v) { vi = +t.dataset.v; render(); loadModel(); }
         else if (t.dataset.tab) { tab = tab === t.dataset.tab ? null : t.dataset.tab; render(); }
         else if (t.dataset.part) goz.highlight(t.dataset.part);
       });
     }
- 
+
     startButton.addEventListener('click', async () => {
       startButton.disabled = true;
       startButton.textContent = 'Iniciando...';
       progressContainer.style.display = 'flex';
- 
+
       try {
         await loadEverything();
         if (!loaded) return;
- 
+
         setProgress(90, 'Iniciando cámara...');
         mindarController = new MindARController(arContainer, player, debugMode);
         window.mindarController = mindarController;
- 
+
         await mindarController.start();
- 
+
         if (player?.dom) player.dom.style.display = 'none';
- 
+
         overlay.classList.add('hidden');
         document.body.classList.add('ar-on');
         initGoz();
@@ -531,7 +541,7 @@
         setProgress(0, 'No se pudo iniciar');
       }
     });
- 
+
     // Precarga de la escena; la cámara solo se solicita al tocar Iniciar.
     loadEverything().catch(error => {
       console.error('Error durante la carga automática:', error);
