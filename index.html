@@ -257,19 +257,23 @@
     body.ar-on #hud{display:block}
     #hud button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
     #top{position:absolute;top:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;padding:max(.5rem,env(safe-area-inset-top)) .6rem 0}
-    #sheet{width:min(520px,100%);max-height:min(34dvh,300px);display:flex;flex-direction:column;gap:.45rem;padding:.7rem .8rem .6rem;border-radius:20px;border:1px solid rgba(240,138,28,.8);
+    #sheet{width:min(520px,100%);display:flex;flex-direction:column;gap:.45rem;padding:.7rem .8rem .6rem;border-radius:20px;border:1px solid rgba(240,138,28,.8);
       background:rgba(18,15,13,.86);backdrop-filter:blur(14px);transform:translateY(-140%);opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.2,.9,.2,1),opacity .3s}
     #sheet.open{transform:none;opacity:1;pointer-events:auto}
     .sh-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
     #sh-name{font-family:'Playfair Display',serif;font-size:1.2rem;line-height:1.1;margin:0}
     #sh-tag{color:#b3a597;font-size:.76rem;margin:.1rem 0 0}
-    #sh-close{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid #3a2d22;background:rgba(255,255,255,.05);font-size:1rem;line-height:1}
-    .chips{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none}
+    #sh-close,#dt-close{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid #3a2d22;background:rgba(255,255,255,.05);font-size:1rem;line-height:1}
+    .chips{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+    .sh-head{flex-shrink:0}
     .chips::-webkit-scrollbar{display:none}
     .chips button{flex:0 0 auto;padding:.3rem .8rem;border-radius:999px;border:1px solid #3a2d22;background:transparent;font-size:.8rem}
     .chips button.on{background:linear-gradient(180deg,#ffb454,#f08a1c);color:#1b0f02;border-color:transparent;font-weight:700}
     #variants:empty{display:none}
-    #tabs button{background:rgba(255,255,255,.04)}
+    #tabs button{flex:1 1 0;background:rgba(255,255,255,.04);white-space:nowrap}
+    #detail{width:min(520px,100%);margin-top:.45rem;max-height:min(30dvh,270px);display:flex;flex-direction:column;gap:.5rem;padding:.7rem .8rem;border-radius:20px;border:1px solid rgba(240,138,28,.6);background:rgba(18,15,13,.92);backdrop-filter:blur(14px);pointer-events:auto;animation:dropin .3s ease}
+    #detail h3{margin:0;font-family:'Playfair Display',serif;font-size:1.05rem;color:#ffb454}
+    @keyframes dropin{from{opacity:0;transform:translateY(-10px)}}
     #sh-body{overflow-y:auto;min-height:0;display:grid;gap:.4rem;align-content:start;overscroll-behavior:contain}
     .ing{display:grid;gap:.05rem;text-align:left;padding:.5rem .7rem;border-radius:12px;border:1px solid #3a2d22;background:rgba(255,255,255,.04)}
     .ing:active{border-color:#f08a1c}
@@ -323,12 +327,15 @@
         </div>
         <div class="chips" id="variants"></div>
         <div class="chips" id="tabs"></div>
+        </section>
+      <section id="detail" hidden>
+        <div class="sh-head"><h3 id="dt-title"></h3><button id="dt-close" aria-label="Cerrar">✕</button></div>
         <div id="sh-body"></div>
       </section>
       <button id="peek" hidden>Ver ficha ▾</button>
     </div>
     <div id="bottom">
-      <div id="hint">Elige un producto para verlo en AR</div>
+      <div id="hint">Apunta al código y elige un producto</div>
       <div id="actions" hidden>
         <button id="explode">Separar ingredientes</button>
         <a id="order" class="go" href="#" target="_blank" rel="noopener">Pedir</a>
@@ -437,26 +444,28 @@
       const $ = (id) => document.getElementById(id);
       const sheet = $('sheet'), deck = $('deck'), body = $('sh-body');
       const WHATSAPP = '573000000000'; // ← cambia por el número real (con indicativo, sin +)
-      let pi = -1, vi = 0, tab = 'ing', exploded = false;
+      let pi = -1, vi = 0, tab = null, exploded = false;
       const goz = createGoz({ mount, camera: cam, dom: arContainer, onTap: () => setOpen(true) });
  
       deck.innerHTML = PRODUCTS.map((p, i) => `<button class="pcard" data-i="${i}"><span class="ico">${p.icon}</span><b>${p.name}</b></button>`).join('');
  
-      function setOpen(o) { sheet.classList.toggle('open', o); $('peek').hidden = o || pi < 0; }
+      function setOpen(o) { sheet.classList.toggle('open', o); $('peek').hidden = o || pi < 0; $('detail').hidden = !o || !tab; }
  
       function render() {
         const p = PRODUCTS[pi], v = p.variants[vi];
         const al = v.specs.find((x) => x[0].startsWith('Contiene'));
         const specs = v.specs.filter((x) => x !== al);
-        const tabs = [['ing', 'Ingredientes'], ['spec', 'Ficha técnica']];
-        if (al) tabs.push(['al', 'Alérgenos']);
-        if (!tabs.some((t) => t[0] === tab)) tab = 'ing';
+        const tabs = [['ing', '🧾 Ingredientes'], ['spec', '📋 Ficha']];
+        if (al) tabs.push(['al', '⚠️ Alérgenos']);
+        if (tab && !tabs.some((t) => t[0] === tab)) tab = null;
  
         $('sh-name').textContent = `${p.icon} ${p.name}`;
         $('sh-tag').textContent = p.tag;
         $('variants').innerHTML = p.variants.length > 1 ? p.variants.map((x, j) => `<button data-v="${j}" class="${j === vi ? 'on' : ''}">${x.label}</button>`).join('') : '';
         $('tabs').innerHTML = tabs.map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('');
-        body.innerHTML =
+        $('dt-title').textContent = tab ? tabs.find((t) => t[0] === tab)[1].replace(/^\S+\s/, '') : '';
+        $('detail').hidden = !tab || !sheet.classList.contains('open');
+        body.innerHTML = !tab ? '' :
           tab === 'ing' ? v.ingredients.map((g) => `<button class="ing" data-part="${g.part}"><b>${g.name}</b><span>${g.detail || ''}</span></button>`).join('') :
           tab === 'spec' ? `<dl>${specs.map(([k, val]) => `<div><dt>${k}</dt><dd>${val}</dd></div>`).join('')}</dl>` :
           `<p class="al">${al[1]}</p><p class="note">Información de referencia. Si tienes alguna alergia, confírmala con el local.</p>`;
@@ -466,7 +475,7 @@
  
       function select(i) {
         if (i === pi) { setOpen(!sheet.classList.contains('open')); return; }
-        pi = i; vi = 0; tab = 'ing'; render();
+        pi = i; vi = 0; tab = null; render();
         goz.show(PRODUCTS[pi], vi); goz.setExplode(exploded);
         setOpen(true); $('hint').classList.add('gone'); $('actions').hidden = false;
         deck.querySelectorAll('.pcard').forEach((c, j) => c.classList.toggle('on', j === i));
@@ -480,11 +489,16 @@
         }
       });
       $('peek').addEventListener('click', () => setOpen(true));
+      $('detail').addEventListener('click', (e) => {
+        const t = e.target.closest('button'); if (!t) return;
+        if (t.id === 'dt-close') { tab = null; render(); }
+        else if (t.dataset.part) goz.highlight(t.dataset.part);
+      });
       sheet.addEventListener('click', (e) => {
         const t = e.target.closest('button'); if (!t) return;
         if (t.id === 'sh-close') setOpen(false);
         else if (t.dataset.v) { vi = +t.dataset.v; render(); goz.show(PRODUCTS[pi], vi); goz.setExplode(exploded); }
-        else if (t.dataset.tab) { tab = t.dataset.tab; render(); }
+        else if (t.dataset.tab) { tab = tab === t.dataset.tab ? null : t.dataset.tab; render(); }
         else if (t.dataset.part) goz.highlight(t.dataset.part);
       });
     }
