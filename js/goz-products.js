@@ -6,7 +6,7 @@ const BURGER_ING = [
   { name: 'Pan brioche', detail: 'Suave y ligeramente dulce, con ajonjolí.', part: 'bun' },
   { name: 'Carne 150 g', detail: 'Blend de cogote de res, pecho de res y barriga de cerdo o tocino.', part: 'patty' },
   { name: 'Queso cheddar', detail: 'Derretido sobre cada carne.', part: 'cheese' },
-  { name: 'Cebolla caramelizada', detail: 'Cocinada lento hasta quedar dulce.', part: 'onion' },
+  { name: 'Cebolla caramelizada', detail: 'Cocinada lento hasta quedar dulce. Misma porción en las tres.', part: 'onion' },
   { name: 'Salsa de la casa', detail: 'Nuestra receta propia.', part: 'sauce' },
 ];
 const NAMES = ['Sencilla', 'Doble', 'Triple'];
@@ -14,17 +14,17 @@ const NAMES = ['Sencilla', 'Doble', 'Triple'];
 export const PRODUCTS = [
   { id: 'burger', icon: '🍔', name: 'Hamburguesa', tag: 'Blend de 3 cortes · pan brioche',
     variants: [1, 2, 3].map(n => ({
-      label: NAMES[n - 1], patties: n, ingredients: BURGER_ING,
+      label: NAMES[n - 1], patties: n, model: 'assets/models/' + ['sencilla', 'doble', 'triple'][n - 1] + '.glb', ingredients: BURGER_ING,
       specs: [['Carnes', `${n} × 150 g`], ['Carne total', `${150 * n} g`], ['Blend', 'Cogote, pecho de res y barriga de cerdo/tocino'],
-              ['Pan', 'Brioche'], ['Queso', `Cheddar ×${n}`], ['Contiene (verifica)', 'Gluten, lácteos, cerdo']] })) },
+              ['Pan', 'Brioche'], ['Queso', `Cheddar ×${n}`], ['Cebolla caramelizada', 'Misma porción en todas'], ['Contiene (verifica)', 'Gluten, lácteos, cerdo']] })) },
   { id: 'choripan', icon: '🌭', name: 'Choripán', tag: 'Clásico tradicional · glaseado',
     variants: [
-      { label: 'Cerveza negra', glaze: 0x3a1d0c,
+      { label: 'Cerveza negra', glaze: 0x3a1d0c, model: 'assets/models/cerveza.glb', fallback: 'assets/models/choripan.glb',
         ingredients: [{ name: 'Pan', detail: 'Pan clásico para choripán.', part: 'bun' },
           { name: 'Chorizo', detail: 'Clásico y tradicional, a la parrilla.', part: 'sausage' },
           { name: 'Glaseado de cerveza negra', detail: 'Cerveza negra, panela, mantequilla, ajo, cebolla y salsa inglesa.', part: 'glaze' }],
         specs: [['Tipo', 'Choripán clásico'], ['Reducción', 'Cerveza negra'], ['Contiene (verifica)', 'Gluten, lácteos, alcohol de la reducción']] },
-      { label: "Jack Daniel's", glaze: 0xc77a1e,
+      { label: "Jack Daniel's", glaze: 0xc77a1e, model: 'assets/models/Jack.glb', fallback: 'assets/models/choripan.glb',
         ingredients: [{ name: 'Pan', detail: 'Pan clásico para choripán.', part: 'bun' },
           { name: 'Chorizo', detail: 'Clásico y tradicional, a la parrilla.', part: 'sausage' },
           { name: "Glaseado Jack Daniel's", detail: "Jack Daniel's, jugo de piña, panela, teriyaki, mostaza, pimienta, sal y mantequilla.", part: 'glaze' }],
@@ -54,10 +54,11 @@ function buildBurger(n) {
   for (let i = 0; i < n; i++) {
     layer('patty', mesh(new THREE.CylinderGeometry(.5, .5, .14, 40), C.patty, { roughness: .9 }), .14);
     const ch = mesh(new THREE.BoxGeometry(.95, .03, .95), C.cheese, { roughness: .35 }); ch.rotation.y = .785; layer('cheese', ch, .04);
-    const on = new THREE.Group();
-    for (let j = 0; j < 7; j++) { const t = mesh(new THREE.TorusGeometry(.09, .025, 8, 16), C.onion, { roughness: .4 }); t.position.set(Math.cos(j * 2.4) * .28, 0, Math.sin(j * 2.4) * .28); t.rotation.set(Math.PI / 2, 0, j); on.add(t); }
-    layer('onion', on, .06);
   }
+  // Cebolla caramelizada: UNA sola porción, igual en sencilla, doble y triple
+  const on = new THREE.Group();
+  for (let j = 0; j < 12; j++) { const t = mesh(new THREE.TorusGeometry(.1, .028, 8, 16), C.onion, { roughness: .4 }); t.position.set(Math.cos(j * 2.4) * .3 * (.6 + (j % 3) * .2), (j % 2) * .02, Math.sin(j * 2.4) * .3 * (.6 + (j % 3) * .2)); t.rotation.set(Math.PI / 2, 0, j); on.add(t); }
+  layer('onion', on, .08);
   const top = new THREE.Group();
   const dome = mesh(new THREE.SphereGeometry(.52, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2), C.bun, { roughness: .5 }); dome.scale.y = .8; top.add(dome);
   for (let i = 0; i < 16; i++) { const a = i * 2.4, th = .25 + (i % 5) * .22, s = mesh(new THREE.SphereGeometry(.028, 8, 6), C.sesame);
@@ -90,6 +91,38 @@ function buildDrink() {
   m.g.position.y = -.5; return m;
 }
 
+/* ───────── 2b. MODELOS .GLB (reales) ───────── */
+// Si los nodos del .glb se llaman así (o empiezan así), "Separar" y el brillo funcionan por pieza.
+const KEYS = { bun: ['bun', 'pan', 'brioche'], patty: ['patty', 'carne'], cheese: ['cheese', 'queso', 'cheddar'], onion: ['onion', 'cebolla'], sauce: ['sauce', 'salsa'],
+  sausage: ['sausage', 'chorizo'], glaze: ['glaze', 'glaseado', 'reduccion'], glass: ['glass', 'vaso'], liquid: ['liquid', 'liquido'], ice: ['ice', 'hielo'], straw: ['straw', 'pitillo'], citrus: ['citrus', 'limon'] };
+const gltfCache = {};
+async function getLoader() {
+  if (window.ThreeGLTFLoader) return new window.ThreeGLTFLoader();
+  const { GLTFLoader } = await import('https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/loaders/GLTFLoader.js');
+  return new GLTFLoader();
+}
+const loadGLB = url => gltfCache[url] ||= getLoader().then(l => new Promise((res, rej) => l.load(url, g => res(g.scene), undefined, rej)));
+
+async function buildFromGLB(url, target) {
+  const src = (await loadGLB(url)).clone(true);
+  const box = new THREE.Box3().setFromObject(src), size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+  const m = Model(), wrap = new THREE.Group();
+  src.position.sub(ctr);                                    // centra el modelo
+  wrap.add(src); wrap.scale.setScalar(target / Math.max(size.x, size.z, .001));  // tamaño automático por ancho
+  m.g.add(wrap); wrap.updateMatrixWorld(true);
+  const found = {};
+  src.traverse(o => {
+    if (o === src || !o.name) return;
+    const t = o.name.toLowerCase().split(/[^a-z]+/);
+    for (const [part, keys] of Object.entries(KEYS)) if (t.some(x => keys.some(q => x === q || x.startsWith(q)))) { (found[part] ||= []).push(o); break; }
+  });
+  const cy = o => new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()).y;
+  const names = Object.keys(found).sort((a, b) => cy(found[a][0]) - cy(found[b][0]));
+  m.explodable = names.length >= 2;
+  if (m.explodable) names.forEach((part, i) => found[part].forEach(o => { o.userData.y = [o.position.y, o.position.y + i * size.y * .12]; (m.parts[part] ||= []).push(o); }));
+  return m;
+}
+
 /* ───────── 3. CONTROLADOR ───────── */
 export function createGoz({ mount, camera, dom, onTap }) {
   const stage = new THREE.Group();
@@ -100,7 +133,7 @@ export function createGoz({ mount, camera, dom, onTap }) {
   const dl = new THREE.DirectionalLight(0xffffff, 1.8); dl.position.set(2, 4, 3); stage.add(dl);
   mount.add(stage);
 
-  let cur = null, s = 0, v = 0, ex = 0, exT = 0, hl = null, hlEnd = 0, drag = false, moved = 0, lx = 0;
+  let token = 0, cur = null, s = 0, v = 0, ex = 0, exT = 0, hl = null, hlEnd = 0, drag = false, moved = 0, lx = 0;
   const clock = new THREE.Clock(), ray = new THREE.Raycaster();
   const glow = (name, on, t = 0) => (cur?.parts[name] || []).forEach(o => o.traverse(m => { if (m.material?.emissive) { m.material.emissive.setHex(0xff8a1c); m.material.emissiveIntensity = on ? .45 + .35 * Math.sin(t * 10) : 0; } }));
 
@@ -125,13 +158,19 @@ export function createGoz({ mount, camera, dom, onTap }) {
   });
 
   return {
-    show(p, vi = 0) {
+    async show(p, vi = 0) {
+      const my = ++token, v0 = p.variants[vi];
+      let m = null;
+      for (const url of [v0.model, v0.fallback].filter(Boolean)) {
+        try { m = await buildFromGLB(url, p.id === 'burger' ? 1.1 : 1.5); break; } catch (e) { console.warn('[Goz] No se pudo cargar', url, e); }
+      }
+      if (my !== token) return null;                           // llegó otra selección mientras cargaba
+      if (!m) m = p.id === 'burger' ? buildBurger(v0.patties) : p.id === 'choripan' ? (x => (x.setGlaze(v0.glaze), x))(buildChori(v0.glaze)) : buildDrink();
       if (cur) rig.remove(cur.g);
-      const v0 = p.variants[vi];
-      cur = p.id === 'burger' ? buildBurger(v0.patties) : p.id === 'choripan' ? (m => (m.setGlaze(v0.glaze), m))(buildChori(v0.glaze)) : buildDrink();
-      rig.add(cur.g); s = 0; v = 0; hl = null;
+      cur = m; rig.add(cur.g); s = 0; v = 0; hl = null;
+      return { explodable: m.explodable !== false };
     },
-    hide() { if (cur) rig.remove(cur.g); cur = null; },
+    hide() { token++; if (cur) rig.remove(cur.g); cur = null; },
     setExplode(b) { exT = b ? 1 : 0; },
     highlight(name) { if (hl) glow(hl, false); hl = name; hlEnd = clock.elapsedTime + 1.8; },
   };
