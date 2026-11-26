@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GÖZ FIRE | GÖZ Parrilla</title>
+    <link rel="stylesheet" href="css/app.css">
+
+    <!-- Los modulos de three.js (exportadores, etc.) importan "three" -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.181.1/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.181.1/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <div id="app">
+        <video id="video-renderer"></video>
+        <canvas id="canvas-renderer"></canvas>
+    </div>
+
+    <header id="fire-top"><a href="../">‹ Volver a productos</a><strong>GÖZ FIRE 🔥</strong><button id="sound" type="button" aria-pressed="true">Sonido: sí</button></header>
+    <div id="fire-hint" role="status">Frunce el ceño o guiña un ojo</div>
+    <div id="fire-start"><img src="../assets/Logo.png" alt="GÖZ Parrilla"><h1>GÖZ FIRE</h1><p>Frunce el ceño para emitir humo.<br>Guiña un ojo para lanzar llamas.</p><button id="begin" type="button">Activar cámara frontal</button><p id="message" role="status"></p><a href="../">Volver a productos</a></div>
+    <script type="module">
+        import { startFaceFilter } from "./js/mediapipe/mediapipe_controller.js";
+
+        import { FireAudio } from "./js/mediapipe/fire_effects.js";
+        const audio = new FireAudio();
+        const start = document.getElementById('begin'), overlay=document.getElementById('fire-start');
+        const sound=document.getElementById('sound'), hint=document.getElementById('fire-hint');
+        start.addEventListener('click', async () => {
+            if(start.dataset.retry){location.reload();return;}
+            start.disabled=true; document.getElementById('message').textContent='Cargando máscara original…';
+            await audio.unlock();
+            try { await startFaceFilter('app.json',{showGui:false,audio,onStatus:s=>hint.textContent=s}); overlay.hidden=true; }
+            catch(e){ console.error(e); document.getElementById('message').textContent='No se pudo iniciar: '+e.message; start.textContent='Recargar'; start.dataset.retry='1'; start.disabled=false; }
+        });
+        sound.addEventListener('click',()=>{ audio.enabled=!audio.enabled; if(audio.enabled)audio.unlock();else audio.stop(); sound.textContent='Sonido: '+(audio.enabled?'sí':'no'); sound.setAttribute('aria-pressed',String(audio.enabled)); });
+        window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
+    </script>
+</body>
+
+</html>
